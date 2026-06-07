@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luxury Wedding Team</title>
+    <style>
+      :root {
+        --bg: #f5efe3;
+        --text: #17120d;
+        --gold: #b89358;
+        --gold-soft: #d8c09a;
+        --deep: #181818;
+        --line: #c6ad81;
+        --paper: #fcf8f0;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .screen { display: none; min-height: 100vh; }
+      .screen.active { display: block; }
+      .container { width: min(1120px, 92%); margin: 0 auto; }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 0;
+      }
+      .tiny {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+      }
+      .link {
+        color: inherit;
+        text-decoration: none;
+        opacity: 0.9;
+      }
+      .link:hover { opacity: 0.65; }
+      .hero {
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-bg {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(8, 9, 12, 0.35), rgba(14, 11, 9, 0.6), rgba(245, 239, 227, 0.95)),
+          url("/images/hero-premium-event.jpg") center/cover no-repeat;
+      }
+      .hero-content {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .hero-main {
+        margin: auto 0;
+        text-align: center;
+        color: #fff;
+        animation: fadeUp 0.8s ease both;
+      }
+      .headline {
+        margin: 0;
+        font-size: clamp(44px, 8vw, 96px);
+        line-height: 0.94;
+        letter-spacing: -0.03em;
+        font-weight: 500;
+      }
+      .sub {
+        max-width: 760px;
+        margin: 18px auto 0;
+        color: #f5ead5;
+        font-size: clamp(18px, 3vw, 28px);
+      }
+      .cta-row {
+        margin-top: 34px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 14px;
+      }
+      .btn {
+        border: 1px solid var(--line);
+        background: transparent;
+        color: #fff;
+        padding: 16px 26px;
+        min-width: 250px;
+        text-transform: uppercase;
+        letter-spacing: 0.13em;
+        font-size: 12px;
+        cursor: pointer;
+        transition: transform 0.35s ease, background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+      }
+      .btn:hover { transform: translateY(-2px); }
+      .btn.gold {
+        background: var(--gold-soft);
+        border-color: var(--gold-soft);
+        color: #151515;
+      }
+      .btn.gold:hover { background: #eadabb; }
+      .section {
+        padding: 42px 0 72px;
+        border-top: 1px solid rgba(157, 121, 66, 0.32);
+      }
+      .section h2 {
+        margin: 0;
+        font-size: clamp(32px, 5.2vw, 62px);
+        line-height: 1.02;
+      }
+      .section p { color: #463d33; max-width: 720px; }
+      .page-title {
+        margin: 26px 0 10px;
+        font-size: clamp(38px, 6vw, 76px);
+        line-height: 0.95;
+      }
+      .muted { color: #51483c; }
+      .progress { height: 4px; background: #ddd0bb; margin: 18px 0 26px; }
+      .bar { height: 100%; width: 33.333%; background: var(--gold); transition: width 0.35s ease; }
+      .panel {
+        background: var(--paper);
+        border: 1px solid rgba(164, 132, 79, 0.43);
+        border-radius: 18px;
+        padding: 24px;
+      }
+      input, select {
+        width: 100%;
+        border: 1px solid rgba(161, 128, 73, 0.48);
+        background: transparent;
+        color: #17120d;
+        padding: 14px;
+        font-size: 16px;
+        outline: none;
+      }
+      input:focus, select:focus { border-color: #8f7548; }
+      .row { display: flex; gap: 12px; flex-wrap: wrap; }
+      .venue-grid, .role-grid, .team-grid {
+        display: grid;
+        gap: 10px;
+      }
+      .venue-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); max-height: 300px; overflow: auto; }
+      .role-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .team-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+      .chip {
+        border: 1px solid rgba(161, 128, 73, 0.45);
+        background: transparent;
+        color: #2f271d;
+        padding: 12px;
+        text-align: left;
+        cursor: pointer;
+      }
+      .chip.active {
+        background: var(--deep);
+        border-color: var(--deep);
+        color: #f7e9ce;
+      }
+      .loader {
+        width: 54px;
+        height: 54px;
+        border-radius: 999px;
+        border: 2px solid rgba(161, 128, 73, 0.4);
+        border-top-color: #1a1a1a;
+        margin: 0 auto;
+        animation: spin 0.9s linear infinite;
+      }
+      .center { text-align: center; }
+      .calendar {
+        border: 1px solid rgba(161, 128, 73, 0.4);
+        border-radius: 14px;
+        padding: 12px;
+        background: #fffdf7;
+      }
+      .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .calendar-nav {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        color: #2f271d;
+      }
+      .week, .days {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .week { font-size: 11px; color: #7c6d59; text-align: center; margin-bottom: 6px; }
+      .day {
+        border: 1px solid rgba(161, 128, 73, 0.35);
+        background: transparent;
+        min-height: 34px;
+        cursor: pointer;
+      }
+      .day.empty { border: 0; cursor: default; }
+      .day.active { background: var(--deep); color: #f7e9ce; border-color: var(--deep); }
+      .actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+      .btn-dark {
+        border: 1px solid var(--deep);
+        background: var(--deep);
+        color: #f7e9ce;
+        padding: 12px 18px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .btn-line {
+        border: 1px solid rgba(161, 128, 73, 0.48);
+        background: transparent;
+        color: #30281f;
+        padding: 12px 18px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .hidden { display: none !important; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+      @media (min-width: 760px) {
+        .venue-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .role-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      }
+    </style>
+  </head>
+  <body>
+    <section id="home" class="screen active hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content container">
+        <header class="topbar">
+          <span class="tiny" style="color:#ead9ba">Luxury Wedding Team</span>
+          <a class="link tiny" style="color:#f2e4c8" target="_blank" rel="noreferrer" href="https://t.me/max_event"></a>
+        </header>
+        <div class="hero-main">
+          <h1 class="headline">Создаем свадьбы,<br />которые чувствуют сердцем</h1>
+          <p class="sub">Подбираем точную команду под ваш стиль, бюджет и площадку.</p>
+          <div class="cta-row">
+            <button id="goWedding" class="btn gold">У меня свадьба</button>
+            <button id="goSpecialist" class="btn">Я специалист</button>
+          </div>
+        </div>
+      </div>
+      <div class="section container">
+        <h2>Минимум шума, максимум атмосферы и сервиса.</h2>
+        <p>Работаем в формате премиального сопровождения: от брифа и подбора команды до финального аккорда вечера.</p>
+      </div>
+    </section>
+
+    <section id="wedding" class="screen">
+      <div class="container">
+        <header class="topbar">
+          <button class="btn-line" data-back="home">На главную</button>
+          <a class="link tiny" href="https://t.me/max_event" target="_blank" rel="noreferrer">Макс</a>
+        </header>
+        <h2 class="page-title">Ваша свадьба</h2>
+        <p class="muted">3 шага для подбора команды.</p>
+        <div class="progress"><div id="stepBar" class="bar"></div></div>
+
+        <div class="panel">
+          <div id="step1">
+            <h3>Шаг 1. Дата свадьбы</h3>
+            <input id="wDate" type="date" />
+          </div>
+          <div id="step2" class="hidden">
+            <h3>Шаг 2. Примерный бюджет</h3>
+            <input id="wBudget" inputmode="numeric" placeholder="Введите сумму в рублях" />
+            <label style="display:flex;align-items:center;gap:10px;margin-top:10px" class="muted">
+              <input id="wIncrease" type="checkbox" style="width:auto" /> Рассматриваете ли вы увеличение бюджета на 10%
+            </label>
+            <p class="muted" id="budgetPreview"></p>
+          </div>
+          <div id="step3" class="hidden">
+            <h3>Шаг 3. Площадка в Томске</h3>
+            <input id="wVenue" list="venueList" placeholder="Введите площадку" />
+            <datalist id="venueList"></datalist>
+            <div class="venue-grid" id="venueGrid" style="margin-top:12px"></div>
+          </div>
+          <div class="actions">
+            <button id="stepBack" class="btn-line">Назад</button>
+            <button id="stepNext" class="btn-dark">Далее</button>
+          </div>
+        </div>
+
+        <div id="wLoading" class="panel center hidden" style="margin-top:14px">
+          <div class="loader"></div>
+          <p>Подбираем лучших специалистов для вашей свадьбы...</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="team" class="screen">
+      <div class="container">
+        <header class="topbar">
+          <button class="btn-line" data-back="home">На главную</button>
+          <a class="link tiny" href="https://t.me/max_event" target="_blank" rel="noreferrer">Макс</a>
+        </header>
+        <h2 class="page-title">Команда под ваш запрос</h2>
+        <p id="teamSummary" class="muted"></p>
+        <div class="team-grid" id="teamGrid" style="margin-top:16px"></div>
+        <a class="btn-dark link" style="display:inline-block;margin-top:20px" href="https://t.me/max_event" target="_blank" rel="noreferrer">Написать Максу</a>
+      </div>
+    </section>
+
+    <section id="specialist" class="screen">
+      <div class="container">
+        <header class="topbar">
+          <button class="btn-line" data-back="home">На главную</button>
+          <a class="link tiny" href="https://t.me/max_event" target="_blank" rel="noreferrer">Макс</a>
+        </header>
+        <h2 class="page-title">Кто ты?</h2>
+        <div class="role-grid" id="roleGrid"></div>
+
+        <form id="specForm" class="panel hidden" style="margin-top:14px">
+          <div class="row">
+            <input id="sName" required placeholder="Ваше имя" />
+            <input id="sExp" required placeholder="Опыт работы" />
+          </div>
+          <div class="row" style="margin-top:10px">
+            <input id="sPortfolio" required type="url" placeholder="Ссылка на портфолио" />
+            <input id="sPrice" required placeholder="Стоимость услуг" />
+          </div>
+          <p class="tiny muted" style="margin-top:16px">Отметьте занятые даты</p>
+          <div id="calendar" class="calendar"></div>
+          <p class="muted" id="busyCount"></p>
+          <div class="actions">
+            <button class="btn-dark" type="submit">Отправить заявку</button>
+            <span id="specOk" class="muted"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <script>
+      const RECEIVER_EMAIL = "booking@example.com";
+      const views = ["home", "wedding", "team", "specialist"];
+      const venues = [
+        "Дворец Торжеств", "Усадьба Шансон", "Парад Парк Отель", "Банкетный зал Шале", "Старый чердак",
+        "Марле Буа", "Трактир Сибирская трапеза", "Кафе Самовар", "Серебряная чаша", "Золотая Долина",
+        "Малина бар", "У Крюгера", "Семейный ресторан Панда", "Кафе-бар Дрезден", "Вечерний Баку",
+        "Кафе Медведи", "Кафе Питер", "Визави", "Кафе-бар Корона", "Боярская Заимка",
+        "Старый Баку", "DJ бар Репутация", "Коктейль Холл", "Madison Hall", "Караоке Duets",
+        "Гримерка Gastro Club", "Karaoke Royal Kings", "Шишки Мишки", "Николо Поле", "Банкетный зал на Усова"
+      ];
+      const team = [
+        { title: "Ведущий", text: "Сценарий и энергия вечера без перегруза." },
+        { title: "Фотограф", text: "Эмоциональные кадры в элегантной обработке." },
+        { title: "Видеограф", text: "Кинематографичная история дня с живым звуком." },
+        { title: "Декоратор", text: "Визуальная среда, цвет и свет под ваш стиль." }
+      ];
+      const roles = ["Ведущий", "Фотограф", "Видеограф", "Рилсмейкер", "Техническое оснащение", "Декоратор"];
+
+      const wedding = { date: "", budgetAmount: "", allowIncrease: false, venue: "" };
+      const specialist = { role: "", name: "", experience: "", portfolio: "", busyDates: [], price: "" };
+      let step = 1;
+      let currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+      const byId = (id) => document.getElementById(id);
+      const show = (id) => {
+        views.forEach((view) => byId(view).classList.remove("active"));
+        byId(id).classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+      const money = (v) => {
+        const n = Number(v || 0);
+        return n ? `${new Intl.NumberFormat("ru-RU").format(n)} руб.` : "не указан";
+      };
+
+      async function sendEmail(subject, payload) {
+        const res = await fetch(`https://formsubmit.co/ajax/${RECEIVER_EMAIL}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ _subject: subject, _template: "table", ...payload })
+        });
+        if (!res.ok) throw new Error("send failed");
+      }
+
+      function renderWeddingStep() {
+        byId("step1").classList.toggle("hidden", step !== 1);
+        byId("step2").classList.toggle("hidden", step !== 2);
+        byId("step3").classList.toggle("hidden", step !== 3);
+        byId("stepBack").disabled = step === 1;
+        byId("stepBack").style.opacity = step === 1 ? "0.35" : "1";
+        byId("stepNext").textContent = step === 3 ? "Подобрать специалистов" : "Далее";
+        byId("stepBar").style.width = `${(step / 3) * 100}%`;
+      }
+
+      function weddingCanProceed() {
+        if (step === 1) return Boolean(wedding.date);
+        if (step === 2) return Number(wedding.budgetAmount) > 0;
+        return Boolean(wedding.venue.trim());
+      }
+
+      function renderVenues() {
+        const dl = byId("venueList");
+        const grid = byId("venueGrid");
+        dl.innerHTML = venues.map((v) => `<option value="${v}"></option>`).join("");
+        grid.innerHTML = venues.map((v) => `<button type="button" class="chip ${wedding.venue === v ? "active" : ""}" data-venue="${v}">${v}</button>`).join("");
+        grid.querySelectorAll("[data-venue]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            wedding.venue = btn.getAttribute("data-venue");
+            byId("wVenue").value = wedding.venue;
+            renderVenues();
+          });
+        });
+      }
+
+      function renderTeam() {
+        byId("teamSummary").textContent = `Дата: ${wedding.date || "не указана"}. Бюджет: ${money(wedding.budgetAmount)}. Увеличение на 10%: ${wedding.allowIncrease ? "да" : "нет"}. Площадка: ${wedding.venue || "не указана"}.`;
+        byId("teamGrid").innerHTML = team.map((item) => `<article class="panel"><h3 style="margin:0;font-size:30px">${item.title}</h3><p class="muted">${item.text}</p></article>`).join("");
+      }
+
+      function renderRoles() {
+        byId("roleGrid").innerHTML = roles.map((role) => `<button type="button" class="chip ${specialist.role === role ? "active" : ""}" data-role="${role}">${role}</button>`).join("");
+        byId("roleGrid").querySelectorAll("[data-role]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            specialist.role = btn.getAttribute("data-role");
+            byId("specForm").classList.remove("hidden");
+            renderRoles();
+          });
+        });
+      }
+
+      function iso(date) {
+        return date.toISOString().split("T")[0];
+      }
+
+      function renderCalendar() {
+        const y = currentMonth.getFullYear();
+        const m = currentMonth.getMonth();
+        const firstWeekday = (new Date(y, m, 1).getDay() + 6) % 7;
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        const cells = [...Array(firstWeekday).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+
+        byId("calendar").innerHTML = `
+          <div class="calendar-header">
+            <button class="calendar-nav" id="prevMonth" type="button">Назад</button>
+            <strong style="text-transform:capitalize">${currentMonth.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}</strong>
+            <button class="calendar-nav" id="nextMonth" type="button">Далее</button>
+          </div>
+          <div class="week"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+          <div class="days">
+            ${cells.map((day, idx) => {
+              if (!day) return `<button class="day empty" type="button" disabled></button>`;
+              const dateIso = iso(new Date(y, m, day));
+              const active = specialist.busyDates.includes(dateIso) ? "active" : "";
+              return `<button class="day ${active}" data-date="${dateIso}" type="button">${day}</button>`;
+            }).join("")}
+          </div>
+        `;
+
+        byId("prevMonth").onclick = () => {
+          currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+          renderCalendar();
+        };
+        byId("nextMonth").onclick = () => {
+          currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+          renderCalendar();
+        };
+
+        byId("calendar").querySelectorAll("[data-date]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const d = btn.getAttribute("data-date");
+            if (specialist.busyDates.includes(d)) {
+              specialist.busyDates = specialist.busyDates.filter((x) => x !== d);
+            } else {
+              specialist.busyDates.push(d);
+            }
+            renderCalendar();
+            byId("busyCount").textContent = specialist.busyDates.length ? `Отмечено занятых дат: ${specialist.busyDates.length}` : "";
+          });
+        });
+      }
+
+      byId("goWedding").onclick = () => show("wedding");
+      byId("goSpecialist").onclick = () => show("specialist");
+      document.querySelectorAll("[data-back]").forEach((el) => {
+        el.addEventListener("click", () => show(el.getAttribute("data-back")));
+      });
+
+      byId("wDate").addEventListener("input", (e) => (wedding.date = e.target.value));
+      byId("wBudget").addEventListener("input", (e) => {
+        wedding.budgetAmount = e.target.value.replace(/\D/g, "");
+        e.target.value = wedding.budgetAmount;
+        byId("budgetPreview").textContent = `Текущий бюджет: ${money(wedding.budgetAmount)}`;
+      });
+      byId("wIncrease").addEventListener("change", (e) => (wedding.allowIncrease = e.target.checked));
+      byId("wVenue").addEventListener("input", (e) => {
+        wedding.venue = e.target.value;
+        renderVenues();
+      });
+
+      byId("stepBack").onclick = () => {
+        step = Math.max(1, step - 1);
+        renderWeddingStep();
+      };
+      byId("stepNext").onclick = async () => {
+        if (!weddingCanProceed()) {
+          alert("Заполните текущий шаг");
+          return;
+        }
+        if (step < 3) {
+          step += 1;
+          renderWeddingStep();
+          return;
+        }
+
+        byId("wLoading").classList.remove("hidden");
+        try {
+          await sendEmail("Заявка: подбор свадебной команды", {
+            date: wedding.date,
+            budget: wedding.budgetAmount,
+            increase10: wedding.allowIncrease ? "Да" : "Нет",
+            venue: wedding.venue,
+          });
+        } catch (e) {
+          alert("Проверьте RECEIVER_EMAIL в index.html");
+        }
+        await new Promise((r) => setTimeout(r, 1400));
+        byId("wLoading").classList.add("hidden");
+        renderTeam();
+        show("team");
+      };
+
+      renderVenues();
+      renderWeddingStep();
+      renderRoles();
+      renderCalendar();
+
+      byId("specForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        specialist.name = byId("sName").value;
+        specialist.experience = byId("sExp").value;
+        specialist.portfolio = byId("sPortfolio").value;
+        specialist.price = byId("sPrice").value;
+
+        try {
+          await sendEmail("Заявка от специалиста", {
+            role: specialist.role,
+            name: specialist.name,
+            experience: specialist.experience,
+            portfolio: specialist.portfolio,
+            busyDates: specialist.busyDates.join(", ") || "Не отмечены",
+            price: specialist.price,
+          });
+          byId("specOk").textContent = "Заявка отправлена";
+        } catch (e) {
+          alert("Проверьте RECEIVER_EMAIL в index.html");
+        }
+      });
+    </script>
+  </body>
+</html>
